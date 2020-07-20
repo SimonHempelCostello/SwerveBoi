@@ -11,5 +11,5 @@ package frc.robot;
  * Add your docs here.
  */
 public class RobotStats {
-    public static double encoderTicsPerModuleRotation = 18.0;
+    public static double moduleToEncoderRatio = 0.05555;
 }

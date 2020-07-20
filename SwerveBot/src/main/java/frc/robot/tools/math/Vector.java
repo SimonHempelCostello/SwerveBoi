@@ -33,7 +33,7 @@ public class Vector {
 	  yVec = y;
    }
    public double getVectorAngleToi(){
-      if(Math.abs(xVec)<0.01 && Math.abs(yVec)<0.01){
+      if(Math.abs(xVec)<0.8 && Math.abs(yVec)<0.8){
          return lastAngle;
       }
       else{
