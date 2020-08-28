@@ -102,9 +102,6 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     RobotMap.backLeftSwerveModule.teleopPeriodic();
-    RobotMap.backRightSwerveModule.teleopPeriodic();
-    RobotMap.frontRightSwerveModule.teleopPeriodic();
-    RobotMap.frontLeftSwerveModule.teleopPeriodic();
   }
 
   @Override

@@ -40,15 +40,12 @@ public class Vector {
          double angle;
          angle = Math.atan(yVec/xVec);
          if(xVec<0){
-            angle = angle+Math.PI;
+            angle = angle + Math.PI;
          }
-         else if(xVec>0&&yVec<0){
-            angle = 2*Math.PI+angle;
+         else if(xVec>=0 &&yVec<0){
+            angle = angle + 2*Math.PI;
          }
          lastAngle = angle;
-         if(angle<0){
-            angle = 4.7123;
-         }
          return angle;
       }
       

@@ -8,6 +8,8 @@
 package frc.robot.subsystems;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
@@ -35,24 +37,13 @@ public class SwerveModule extends SubsystemBase {
   private double offset;
   private double startingAngle;
   private Vector outputVector= new Vector(0, 0);
-  private double currVal;
   private double inputPos;
-  private double outputPos;
-  private double upInput;
-  private double downInput;
-  private double upRevInput;
-  private double downRevInput;
-  private double upDif;
+  private double currentPos;
+  private double currentAbsPos;
+  private double midDif;
   private double downDif;
-  private double upRevDif;
-  private double downRevDif;
-  private double currentAbsPosition;
-  private double currentAbsAngle;
-  private double inputPosAngle;
-  private double lastThrottleDirection;
-  private ArrayList<Double> difArrayList = new ArrayList<Double>();
-
-  private double modOffset;
+  private double upDif;
+  private List<Double> valList = new ArrayList<Double>(); 
   public SwerveModule(double P, double I, double D, CANSparkMax turnMotor, CANSparkMax driveMotor, Counter absoluteEncoder, double absEncoderOffset ) {
     kP = P;
     kI = I;
@@ -75,56 +66,36 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber("startingPosition", startingAngle);    
     tMotor.getEncoder().setPositionConversionFactor(RobotStats.moduleToEncoderRatio);
     tMotor.getEncoder().setPosition(startingAngle);
-    mpidController.setReference(Math.round(startingAngle),ControlType.kPosition );
+    //mpidController.setReference(Math.round(startingAngle),ControlType.kPosition );
+    currentPos = tMotor.getEncoder().getPosition();
     SmartDashboard.putNumber("setPos", 0);
   }
   public void setOutput(Vector inputVector){
     inputPos = (inputVector.getVectorAngleToi())/(2*Math.PI);
-    upInput = inputPos;
-    downInput  = -inputPos;
-    upRevInput = inputPos -0.5;
-    downRevInput = -inputPos + 0.5;
-    currentAbsPosition  = currVal%1;
-    upDif = upInput-currentAbsPosition;
-    downDif = downInput-currentAbsPosition;
-    upRevDif = upRevInput - currentAbsPosition;
-    downRevDif = downRevInput-currentAbsPosition;
-    
-    if(Math.abs(upDif)<Math.abs(downDif)&&Math.abs(upDif)<Math.abs(upRevDif)&&Math.abs(upDif)<Math.abs(downRevDif)){
-      currVal = currVal + upDif;
+    currentAbsPos = currentPos%1;
+    if(inputPos == currentAbsPos){
+      upDif = 0;
+      downDif = 0;
     }
-    else if(Math.abs(downDif)<Math.abs(upRevDif)&&Math.abs(downDif)<Math.abs(downRevDif)){
-      currVal = currVal +downDif;
-    }
-    else if(Math.abs(upRevDif)<Math.abs(downRevDif)){
-      currVal = currVal + upRevDif;
+    if(inputPos>currentAbsPos){
+      upDif = Math.abs(inputPos-currentAbsPos);
+      downDif = -Math.abs((inputPos-1)-currentAbsPos);    
     }
     else{
-      currVal = currVal + downRevDif;
+      upDif = Math.abs((inputPos+1)-currentAbsPos);
+      downDif = -Math.abs(currentAbsPos-inputPos);
     }
-    /*SmartDashboard.putNumber("upInput", upInput);
-    SmartDashboard.putNumber("downInput", downInput);
-    SmartDashboard.putNumber("upRevInput", upRevInput);
-    SmartDashboard.putNumber("downRevInput", downRevInput);
-    SmartDashboard.putNumber("currVal", currentAbsPosition);
-    SmartDashboard.putNumber("upDif", upDif);
-    SmartDashboard.putNumber("downDif", downDif);*/
-    currentAbsAngle = Math.abs((currVal%1)*2*Math.PI);
-    inputPosAngle = Math.abs(inputPos*2*Math.PI);
-    SmartDashboard.putBoolean("rev", Math.abs(currentAbsAngle-inputPosAngle)>=180);
-    SmartDashboard.putNumber("currentAbleAngle",currentAbsAngle );
-    SmartDashboard.putNumber("inputPosAngle", inputPosAngle);
-    if(Math.abs(currentAbsAngle-inputPosAngle)>90){
-      setThrottle(inputVector.magnitude()*0.25, true);
+    SmartDashboard.putNumber("inputPos", inputPos);
+    SmartDashboard.putNumber("currentAbsPos", currentAbsPos);
+    SmartDashboard.putNumber("A upDif", upDif);
+    SmartDashboard.putNumber("A downDif", downDif);
+    SmartDashboard.putNumber("currentPos", currentPos);
+    if(Math.abs(upDif)<Math.abs(downDif)){
+      currentPos = currentPos+upDif;
     }
     else{
-      setThrottle(inputVector.magnitude()*0.25, false);
-
+      currentPos = currentPos + downDif;
     }
-   
-
-    setAngle(currVal);
- 
   }
   public double getAbsEncoderValue(){
     return aEncoder.getPeriod()*-1000000;
@@ -144,7 +115,7 @@ public class SwerveModule extends SubsystemBase {
     return tMotor.getEncoder().getPosition();
   }
   public void teleopPeriodic(){
-    outputVector.setX(-RobotMap.buttonMap.driveStickSideways());
+    outputVector.setX(RobotMap.buttonMap.driveStickSideways());
     outputVector.setY(RobotMap.buttonMap.driveStickUP());
 
     setOutput(outputVector);
