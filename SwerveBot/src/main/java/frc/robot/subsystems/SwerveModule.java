@@ -40,9 +40,9 @@ public class SwerveModule extends SubsystemBase {
   private double inputPos;
   private double currentPos;
   private double currentAbsPos;
-  private double midDif;
   private double downDif;
   private double upDif;
+  private boolean revPower;
   private List<Double> valList = new ArrayList<Double>(); 
   public SwerveModule(double P, double I, double D, CANSparkMax turnMotor, CANSparkMax driveMotor, Counter absoluteEncoder, double absEncoderOffset ) {
     kP = P;
@@ -71,37 +71,41 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber("setPos", 0);
   }
   public void setOutput(Vector inputVector){
-    inputPos = (inputVector.getVectorAngleToi())/(2*Math.PI);
-    currentAbsPos = currentPos%1;
-    if(inputPos == currentAbsPos){
-      upDif = 0;
-      downDif = 0;
-    }
-    if(inputPos>currentAbsPos){
-      upDif = Math.abs(inputPos-currentAbsPos);
-      downDif = -Math.abs((inputPos-1)-currentAbsPos);    
+    revPower = false;
+    inputPos = Math.toDegrees(inputVector.getVectorAngleToi());
+    currentAbsPos = currentPos%360;
+    upDif = inputPos-currentAbsPos;
+    if(Math.signum(upDif)>=0){
+      downDif = upDif-360;
     }
     else{
-      upDif = Math.abs((inputPos+1)-currentAbsPos);
-      downDif = -Math.abs(currentAbsPos-inputPos);
+      downDif = upDif + 360;
     }
+    
+    
+   
+    SmartDashboard.putBoolean("reverse", revPower);
     SmartDashboard.putNumber("inputPos", inputPos);
     SmartDashboard.putNumber("currentAbsPos", currentAbsPos);
     SmartDashboard.putNumber("A upDif", upDif);
     SmartDashboard.putNumber("A downDif", downDif);
     SmartDashboard.putNumber("currentPos", currentPos);
+    
     if(Math.abs(upDif)<Math.abs(downDif)){
-      currentPos = currentPos+upDif;
+      currentPos = currentPos + upDif;
     }
     else{
       currentPos = currentPos + downDif;
     }
+    setAngle(currentPos);
+    setThrottle(inputVector.magnitude()*.25, revPower);
+   
   }
   public double getAbsEncoderValue(){
     return aEncoder.getPeriod()*-1000000;
   }
   public void setAngle(double desiredPosition){
-    mpidController.setReference(desiredPosition, ControlType.kPosition);
+    mpidController.setReference(desiredPosition/360, ControlType.kPosition);
   }
   public void setThrottle(double desiredThrottle, boolean reverse){
     if(reverse){
