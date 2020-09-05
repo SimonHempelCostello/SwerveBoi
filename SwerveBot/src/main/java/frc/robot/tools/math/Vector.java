@@ -10,6 +10,14 @@ public class Vector {
 	  xVec =0;
 	  yVec = 0.0;
    }
+   public Vector( boolean makeUnitVector, double x, double y){
+      double magnitude = Math.sqrt(Math.pow(x,2)+Math.pow(y, 2));
+
+      if(makeUnitVector){
+         xVec = x/(magnitude);
+         yVec = y/(magnitude);
+      }
+   }
    public Vector( double x, double y ) {
 	  xVec = x;
 	  yVec= y;
@@ -48,11 +56,21 @@ public class Vector {
          lastAngle = angle;
          return angle;
       }
-      
-
    }
-   public Vector normalizeAddVector(Vector vector1, Vector vector2){
-      Vector resultantVector = new Vector(0, 0);
+   public Vector scaleVector(double scalar){
+      Vector resultantVector;
+      try{
+         resultantVector = new Vector(getxVec()*scalar, getyVec()*scalar);
+      }
+      catch(Exception E){
+         resultantVector = new Vector(0, 0);
+      }
+    
+      return resultantVector;
+   }
+
+   public Vector addVector( Vector vector2){
+      Vector resultantVector = new Vector(getxVec()+vector2.getxVec(), getyVec() + vector2.getyVec());
       return resultantVector;
    }
 } 

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.RobotMap;
 import frc.robot.RobotStats;
+import frc.robot.sensors.Navx;
 import frc.robot.tools.math.Vector;
 
 
@@ -43,6 +44,7 @@ public class SwerveModule extends SubsystemBase {
   private double downDif;
   private double upDif;
   private boolean revPower;
+  private Navx moduleNavx;
   private List<Double> valList = new ArrayList<Double>(); 
   public SwerveModule(double P, double I, double D, CANSparkMax turnMotor, CANSparkMax driveMotor, Counter absoluteEncoder, double absEncoderOffset ) {
     kP = P;
@@ -54,6 +56,7 @@ public class SwerveModule extends SubsystemBase {
     offset = absEncoderOffset;
   }
   public void initModule(){
+    moduleNavx = new Navx(RobotMap.navx);
     mpidController = new CANPIDController(dMotor);
     tMotor.enableVoltageCompensation(11.3);
     mpidController = tMotor.getPIDController();
@@ -66,14 +69,13 @@ public class SwerveModule extends SubsystemBase {
     SmartDashboard.putNumber("startingPosition", startingAngle);    
     tMotor.getEncoder().setPositionConversionFactor(RobotStats.moduleToEncoderRatio);
     tMotor.getEncoder().setPosition(startingAngle);
-    //mpidController.setReference(Math.round(startingAngle),ControlType.kPosition );
+    mpidController.setReference(Math.round(startingAngle),ControlType.kPosition );
     currentPos = tMotor.getEncoder().getPosition();
     SmartDashboard.putNumber("setPos", 0);
   }
   public void setOutput(Vector inputVector){
-    revPower = false;
     inputPos = Math.toDegrees(inputVector.getVectorAngleToi());
-    currentAbsPos = currentPos%360;
+    currentAbsPos = currentPos%360-moduleNavx.currentYaw();
     upDif = inputPos-currentAbsPos;
     if(Math.signum(upDif)>=0){
       downDif = upDif-360;
@@ -82,21 +84,37 @@ public class SwerveModule extends SubsystemBase {
       downDif = upDif + 360;
     }
     
+    if(Math.abs(upDif-180)<Math.abs(upDif)||Math.abs(upDif+180)<Math.abs(upDif)){
+      if(Math.abs(upDif-180)<Math.abs(upDif+180)){
+        upDif = upDif - 180;
+      }
+      else{
+        upDif = upDif + 180;
+      }
+    }
     
-   
-    SmartDashboard.putBoolean("reverse", revPower);
-    SmartDashboard.putNumber("inputPos", inputPos);
-    SmartDashboard.putNumber("currentAbsPos", currentAbsPos);
-    SmartDashboard.putNumber("A upDif", upDif);
-    SmartDashboard.putNumber("A downDif", downDif);
-    SmartDashboard.putNumber("currentPos", currentPos);
-    
+    SmartDashboard.putNumber("AcurrentPos sin sign", Math.signum(Math.sin(Math.toRadians(currentPos))));
+    SmartDashboard.putNumber("AcurrentPos cossin sign", Math.signum(Math.cos(Math.toRadians(currentPos))));
+    SmartDashboard.putNumber("BinputPos sin sign", Math.signum(Math.sin(Math.toRadians(inputPos))));
+    SmartDashboard.putNumber("BinputPos cossin sign", Math.signum(Math.cos(Math.toRadians(inputPos))));
+    SmartDashboard.putNumber("z inputPos", inputPos);
+    SmartDashboard.putNumber("z currentPos", currentPos%360);
     if(Math.abs(upDif)<Math.abs(downDif)){
       currentPos = currentPos + upDif;
     }
     else{
       currentPos = currentPos + downDif;
     }
+
+    if(Math.signum(Math.cos(Math.toRadians(inputPos)))!=Math.signum(Math.cos(Math.toRadians(currentPos)))||Math.signum(Math.sin(Math.toRadians(inputPos)))!=Math.signum(Math.sin(Math.toRadians(currentPos)))){
+      revPower = true;
+    }
+    else{
+      revPower = false;
+    }
+    SmartDashboard.putBoolean("revPower", revPower);
+
+   
     setAngle(currentPos);
     setThrottle(inputVector.magnitude()*.25, revPower);
    
@@ -119,10 +137,7 @@ public class SwerveModule extends SubsystemBase {
     return tMotor.getEncoder().getPosition();
   }
   public void teleopPeriodic(){
-    outputVector.setX(RobotMap.buttonMap.driveStickSideways());
-    outputVector.setY(RobotMap.buttonMap.driveStickUP());
-
-    setOutput(outputVector);
+    
 
   }
   @Override

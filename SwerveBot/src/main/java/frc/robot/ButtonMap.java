@@ -8,6 +8,12 @@ public class ButtonMap{
         return -oi.driverController.getRawAxis(1);
     }
     public double driveStickSideways(){
-        return oi.driverController.getRawAxis(0);
+        return -oi.driverController.getRawAxis(0);
+    }
+    public double turnStickUP(){
+        return -oi.driverController.getRawAxis(5);
+    }
+    public double turnStickSideways(){
+        return -oi.driverController.getRawAxis(4);
     }
 }

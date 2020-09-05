@@ -26,6 +26,7 @@ public class RobotConfig {
         RobotMap.frontRightTurn.setIdleMode(IdleMode.kBrake);
         RobotMap.backRightDrive.setIdleMode(IdleMode.kBrake);
         RobotMap.backRightTurn.setIdleMode(IdleMode.kBrake);
+        RobotMap.drive.initializeDriveTrain();
        
     }
     public static void setTeleopConfig(){
@@ -33,10 +34,7 @@ public class RobotConfig {
         RobotMap.frontLeftTurn.setIdleMode(IdleMode.kBrake);
         RobotMap.backRightTurn.setIdleMode(IdleMode.kBrake);
         RobotMap.frontRightTurn.setIdleMode(IdleMode.kBrake);
-        RobotMap.backLeftSwerveModule.initModule();
-        RobotMap.backRightSwerveModule.initModule();
-        RobotMap.frontLeftSwerveModule.initModule();
-        RobotMap.frontRightSwerveModule.initModule();
+        
     }
     public static void setDisabledConfig(){
         RobotMap.backLeftTurn.setIdleMode(IdleMode.kCoast);

@@ -7,12 +7,14 @@
 
 package frc.robot;
 
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.Counter;
 import edu.wpi.first.wpilibj.Encoder;
+import edu.wpi.first.wpilibj.SPI.Port;
 import frc.robot.subsystems.Drivetrain;
 import frc.robot.subsystems.SwerveModule;
 
@@ -40,13 +42,7 @@ public class RobotMap {
     public static Counter backRightAbsEnconder = new Counter(1);
     public static Counter frontRightAbsEnconder = new Counter(2);
     public static Counter frontLeftAbsEnconder = new Counter(3);
-    private static double kP = 1.8;
-    private static double kI = 0.02;
-    private static double kD = 18;
-    public static SwerveModule backLeftSwerveModule = new SwerveModule( kP, kI, kD, backLeftTurn, backLeftDrive, backLeftAbsEnconder, 524.55);
-    public static SwerveModule backRightSwerveModule = new SwerveModule( kP, kI, kD, backRightTurn, backRightDrive, backRightAbsEnconder, 2039.7);
-    public static SwerveModule frontLeftSwerveModule = new SwerveModule( kP, kI, kD, frontLeftTurn, frontLeftDrive, frontLeftAbsEnconder, 1036.55);
-    public static SwerveModule frontRightSwerveModule = new SwerveModule( kP, kI, kD, frontRightTurn, frontRightDrive, frontRightAbsEnconder,3596.7);
     public static Drivetrain drive = new Drivetrain();
     public static ButtonMap buttonMap = new ButtonMap();
+    public static AHRS navx = new AHRS(Port.kMXP);
 }

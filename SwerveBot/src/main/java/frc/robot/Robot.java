@@ -86,6 +86,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
+    RobotMap.drive.initializeDriveTrain();
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to
     // continue until interrupted by another command, remove
@@ -101,7 +102,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void teleopPeriodic() {
-    RobotMap.backLeftSwerveModule.teleopPeriodic();
+    RobotMap.drive.teleopPeriodic();
+   
   }
 
   @Override
